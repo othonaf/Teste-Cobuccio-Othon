@@ -9,6 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { WalletEntity } from 'src/db/entities/wallet.entity';
 import { UserService } from '../user/user.service';
+import { UserEntity } from 'src/db/entities/user.entity';
 
 @Injectable()
 export class WalletService {
@@ -17,6 +18,8 @@ export class WalletService {
   constructor(
     @InjectRepository(WalletEntity)
     private readonly walletRepository: Repository<WalletEntity>,
+    @InjectRepository(UserEntity)
+    private readonly userRepository: Repository<UserEntity>,
     @Inject(forwardRef(() => UserService))
     private readonly userService: UserService,
   ) {}
@@ -28,7 +31,13 @@ export class WalletService {
   ): Promise<WalletEntity> {
     try {
       // Verifica se o usuário existe
-      await this.userService.findUserByCpf(user_cpf);
+      const cpf = user_cpf;
+      const user = await this.userRepository.findOne({
+        where: { cpf },
+      });
+      if (!user) {
+        throw new NotFoundException('Usuário não encontrado');
+      }
 
       // Cria a nova wallet
       const wallet = this.walletRepository.create({

@@ -5,6 +5,9 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { WalletModule } from './wallet/wallet.module';
+import { TransferModule } from './transfer/transfer.module';
+import { BacenController } from './bacen/bacen.controller';
+import { BacenModule } from './bacen/bacen.module';
 
 @Module({
   imports: [
@@ -25,8 +28,11 @@ import { WalletModule } from './wallet/wallet.module';
       }),
       inject: [ConfigService],
     }),
+    TransferModule,
+    BacenModule,
+    WalletModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, BacenController],
   providers: [AppService],
 })
 export class AppModule {}
