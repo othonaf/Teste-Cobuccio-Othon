@@ -3,12 +3,15 @@ import {
   Injectable,
   NotFoundException,
   Logger,
+  Inject,
+  forwardRef,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from 'src/db/entities/user.entity';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './DTO/user.dto';
 import * as bcrypt from 'bcrypt';
+import { WalletService } from 'src/wallet/wallet.service';
 
 @Injectable()
 export class UserService {
@@ -17,6 +20,8 @@ export class UserService {
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
+    @Inject(forwardRef(() => WalletService))
+    private readonly walletService: WalletService,
   ) {}
 
   private validateCpf(cpf: string): boolean {
@@ -34,7 +39,7 @@ export class UserService {
     return await bcrypt.hash(password, salt);
   }
 
-  async findUserByCpf(cpf: string): Promise<UserEntity> {
+  async findUserByCpf(cpf: string): Promise<any> {
     try {
       const user = await this.userRepository.findOne({
         where: { cpf },
@@ -44,9 +49,16 @@ export class UserService {
         this.logger.warn(`Usuário com CPF ${cpf} não encontrado`);
         throw new NotFoundException('Usuário não encontrado');
       }
+      const wallet = await this.walletService.findWalletsByUser(cpf);
+      const userFound = {
+        name: user.name,
+        email: user.email,
+        telefone: user.telefone,
+        wallets: wallet,
+      };
 
       this.logger.debug(`Usuário encontrado: ${cpf}`);
-      return user;
+      return userFound;
     } catch (error) {
       this.logger.error(`Erro ao buscar usuário: ${error.message}`);
       throw error;
