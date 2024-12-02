@@ -60,3 +60,24 @@ VALUES (
     );
 
 SELECT * FROM wallet;
+
+CREATE TABLE IF NOT EXISTS transaction (
+    transaction_id CHAR(36) PRIMARY KEY DEFAULT(UUID()),
+    source_wallet_id CHAR(36) NOT NULL,
+    destination_wallet_id CHAR(36) NOT NULL,
+    amount DECIMAL(10, 2) NOT NULL,
+    type ENUM('PIX', 'TED', 'DOC') NOT NULL,
+    status ENUM(
+        'pending',
+        'completed',
+        'failed',
+        'reversed'
+    ) NOT NULL DEFAULT 'pending',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    reversed_at TIMESTAMP NULL,
+    reason_for_reversal VARCHAR(255) NULL,
+    FOREIGN KEY (source_wallet_id) REFERENCES wallet (wallet_id),
+    FOREIGN KEY (destination_wallet_id) REFERENCES wallet (wallet_id)
+);
+
+SELECT * FROM transaction;
