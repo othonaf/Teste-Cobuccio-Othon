@@ -11,10 +11,9 @@ CREATE TABLE IF NOT EXISTS user (
     name varchar(150) NOT NULL,
     endereco varchar(255) NOT NULL,
     telefone VARCHAR(11) NOT NULL,
-    email VARCHAR(40) NOT NULL
+    email VARCHAR(40) NOT NULL,
+    senha VARCHAR(150) NOT NULL
 );
-
-ALTER TABLE user ADD COLUMN senha VARCHAR(150) NOT NULL;
 
 INSERT INTO
     user (
