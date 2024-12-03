@@ -3,6 +3,7 @@ import {
   Logger,
   NotFoundException,
   ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -15,7 +16,7 @@ import { v4 as uuidv4 } from 'uuid';
 interface TransferMetadata {
   transactionId: string;
   timestamp: string;
-  type: 'PIX' | 'TED' | 'DOC';
+  type: 'PIX' | 'TED' | 'DOC' | string;
   institution: {
     sourceBank: string;
     destinationBank: string;
@@ -95,7 +96,9 @@ export class TransferService {
             type: transferType,
             status: 'pending',
           });
-
+          this.logger.log(
+            `Primeiro registro criado valor do status: 'PENDING'`,
+          );
           await transactionManager.save(transaction);
           await this.registerTransaction(metadata);
 
@@ -122,6 +125,7 @@ export class TransferService {
             // Confirma a transação
             await this.confirmTransaction(metadata);
             await this.mockBacenService.confirmSettlement(transactionId);
+            this.logger.log(`Status atualizado. Valor do status: 'COMPLETED'`);
 
             this.logger.log(
               `Transferência ${transferType} concluída - ID: ${transactionId}`,
@@ -129,6 +133,7 @@ export class TransferService {
           } catch (error) {
             // Reverte status da transação em caso de erro
             transaction.status = 'failed';
+            this.logger.log(`Status atualizado. Valor do status: 'FAILED'`);
             transaction.reason_for_reversal = error.message;
             await transactionManager.save(transaction);
             throw error;
@@ -142,6 +147,125 @@ export class TransferService {
       );
       throw error;
     }
+  }
+
+  async findTransaction(transaction_id: string): Promise<any> {
+    try {
+      const transaction = await this.transactionRepository.findOne({
+        where: { transaction_id },
+      });
+      if (!transaction) {
+        throw new NotFoundException('ID de transação não encontrado.');
+      }
+      return transaction;
+    } catch (error) {
+      this.logger.error(`Erro ao criar usuário: ${error.message}`);
+      throw error;
+    }
+  }
+
+  async reversalTransaction(
+    transaction_id: string,
+    value: number,
+    reverseReason: string,
+  ): Promise<TransactionEntity> {
+    const transactionId = uuidv4();
+    //Procura a transaction na Base de Dados:
+    const transactionFind = await this.transactionRepository.findOne({
+      where: { transaction_id },
+    });
+    if (!transactionFind) {
+      throw new NotFoundException('ID de transação não encontrado.');
+    }
+    if (value > transactionFind.amount) {
+      throw new BadRequestException(
+        'O valor do estorno informado é maior do que o valor original da transação.',
+      );
+    }
+    let createdTransaction: TransactionEntity;
+    // Executa a transferência em uma única transação
+    await this.walletRepository.manager.transaction(
+      async transactionManager => {
+        // Notifica BACEN do início da transação
+        await this.mockBacenService.notifyTransaction(transactionId);
+
+        // Cria registro da transação
+        const transaction = this.transactionRepository.create({
+          transaction_id: transactionId,
+          source_wallet_id: transactionFind.destination_wallet_id,
+          destination_wallet_id: transactionFind.source_wallet_id,
+          amount: value,
+          type: 'reversal',
+          status: 'pending',
+          reason_for_reversal: reverseReason,
+        });
+
+        // Metadados da transação
+        const metadata: TransferMetadata = {
+          transactionId,
+          timestamp: new Date().toISOString(),
+          type: transactionFind.type,
+          institution: {
+            sourceBank: 'BANCO_COBUCCIO_001',
+            destinationBank: 'BANCO_COBUCCIO_001',
+          },
+        };
+        createdTransaction = await transactionManager.save(transaction);
+        await this.registerTransaction(metadata);
+
+        try {
+          const sourceWallet = await this.walletService.findWalletById(
+            transactionFind.destination_wallet_id,
+          );
+          const destinationWallet = await this.walletService.findWalletById(
+            transactionFind.source_wallet_id,
+          );
+
+          // Debita da carteira de origem
+          sourceWallet.balance -= value;
+          sourceWallet.last_updated = new Date();
+          await transactionManager.save(sourceWallet);
+
+          // Simula latência de compensação
+          if (transactionFind.type !== 'PIX') {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          }
+
+          // Credita na carteira de destino
+          destinationWallet.balance += value;
+          destinationWallet.last_updated = new Date();
+          await transactionManager.save(destinationWallet);
+
+          // Atualiza status da transação
+          createdTransaction.status = 'completed';
+          await transactionManager.save(transaction);
+
+          // Confirma a transação
+          await this.confirmTransaction(metadata);
+          await this.mockBacenService.confirmSettlement(transactionId);
+
+          await transactionManager.update(
+            TransactionEntity,
+            { transaction_id: transaction_id },
+            {
+              reversed_at: new Date(),
+              status: 'reversed',
+            },
+          );
+
+          this.logger.log(
+            `Transferência ${transactionFind.type} concluída - ID: ${transactionId}`,
+          );
+        } catch (error) {
+          // Reverte status da transação em caso de erro
+          transaction.status = 'failed';
+          transaction.reason_for_reversal = error.message;
+          await transactionManager.save(transaction);
+          throw error;
+        }
+      },
+    );
+    return createdTransaction;
   }
 
   private async validateTransfer(
