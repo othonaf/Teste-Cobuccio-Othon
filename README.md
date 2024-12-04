@@ -70,10 +70,10 @@ Exemplo de requisição (JSON):
     "senha": "senha123456"
 }
 ```
-2. Consultar Usuário:
+2. Consultar Usuário: </br>
 Endpoint: GET /users/cpf
 
-3. Endpoint de Criar Wallets:
+3. Endpoint de Criar Wallets: </br>
 
 Endpoint: POST /wallets/create
 Exemplo de requisição (JSON):
@@ -84,15 +84,15 @@ Exemplo de requisição (JSON):
     "initial_balance": 1000.00
 }
 ```
-4. Endpoint de pesequisar Wallets por Usuário:
+4. Endpoint de pesequisar Wallets por Usuário: </br>
    
    Endpoint: GET /wallets/user/cpf
 
-5. Endpoint de pesequisar Wallets por ID:
+5. Endpoint de pesequisar Wallets por ID: </br>
    
    Endpoint: GET /wallets/wallet_ID   
 
-6. Endpoint de Realizar Transferência:
+6. Endpoint de Realizar Transferência: </br>
 
 Endpoint: POST /transfers
 Exemplo de requisição (JSON):
@@ -105,7 +105,7 @@ Exemplo de requisição (JSON):
 }
 ```
 
-7. Endpoint de Reverter Transferência:
+7. Endpoint de Reverter Transferência: </br>
 
 Endpoint: POST /transfers/reverse
 Exemplo de requisição (JSON):
@@ -117,7 +117,7 @@ Exemplo de requisição (JSON):
 }
 ```
 
-8. Endpoint de pesequisar Transferência por ID:
+8. Endpoint de pesequisar Transferência por ID: </br>
    
    Endpoint: GET /transfers/transfer_ID 
 
@@ -131,7 +131,7 @@ Os testes estão localizados na pasta `_testes`. Certifique-se de que todas as d
 
 
 ### Executando os Testes
-Para rodar todos os testes:
+Para rodar todos os testes: </br>
 **_Obs_**: Para uma melhor desenvoltura, recomendo executar os testes nos arquivos um por vez:
 
 1. Testando as funções em 'transfer.service':
@@ -151,7 +151,7 @@ Este arquivo contém testes para as funções das regras de negócio (services) 
 Testes Incluídos:
 
 #### TransferService
-   1. Deve ser definedo.
+   1. Deve ser definido.
 
 #### fundsTransfer();
    1. Deve fazer a transferência com sucesso.
@@ -161,7 +161,7 @@ Testes Incluídos:
 #### reversalTransaction();
    1. Deve reverter uma transação com sucesso.
    2. Deve lançar NotFoundException quando a transação não for encontrada.
-   3. Deve lançar BadRequestException quando o valor solicitado do estorno for maior que o original (5 ms)
+   3. Deve lançar BadRequestException quando o valor solicitado do estorno for maior que o original.
 
 ### transfer.controller.spec.ts
 Este arquivo contém testes para o controlador dos endpoints do módulo 'transfer'.
@@ -178,8 +178,3 @@ Testes Incluídos:
 #### reverseTransfer()
    1. Deve reverter uma transferência com sucesso.
    2. Deve lançar uma exceção em caso de erro.
-
-
-
-## Ambiente de Teste
-O banco de dados usado para testes é configurado para rodar em memória, garantindo que os testes sejam isolados e não interfiram no banco de dados de desenvolvimento ou produção.
