@@ -1,8 +1,7 @@
 # Teste-Cobuccio-Othon
-Repositório de uma API de aplicações financeiras em Nest.js como parte do teste de admissão da Cobuccio.
 
 ## Descrição
-Uma aplicação com Backend e Banco de Dados de transações bancárias desenvolvida em Node.js, usando Nest.js e TypeORM no Backend e Mysql, como parte do teste de admissão da Cobuccio.
+Uma aplicação em Docker com Backend e Banco de Dados de transações bancárias desenvolvida em Node.js, usando Nest.js e TypeORM no Backend e Mysql, como parte do teste de admissão da Cobuccio.
 
 ## Tecnologias Utilizadas
 - **Node.js**: Stack principal da aplicação.
@@ -12,29 +11,30 @@ Uma aplicação com Backend e Banco de Dados de transações bancárias desenvol
 - **Jest**: Biblioteca para criação e execução de testes automatizados.
 
 ## Arquitetura Utilizada
-- **Arquitetura modular padrão do Nest.js**: Utilizei aqui o formato fornecido pelo próprio Nest.js como padrão, de acordo com os comandos de geração de cada módulo (Nest generate module | controller | service <nome>).
+- **Arquitetura modular padrão do Nest.js**:  </br>
+- Utilizei aqui o formato fornecido pelo próprio Nest.js como padrão, de acordo com os comandos de geração de cada módulo (Nest generate module | controller | service <nome>).
 
 ## Funcionalidades
 A API permite realizar as seguintes operações:
 - **Criar um Usuário**: Feito através da inserção de dados normalmente solcitados por Instituições Financeiras.
 - **Pesquisar um Usuário**: Através da inserção do CPF.
 - **Criação de Wallets**: Cada Wallet relacionada a um único usuário.
-- **Consulta de Wallet**: Feita através do ID de determinada wallet e pelo CPF do usuário.
+- **Consulta de Wallet**: Feita através do ID de determinada wallet ou pelo CPF do usuário.
 - **Realização de Transferência Bancária**: Feita através dos IDs das wallets de origem e destino.
 - **Reversão de Transferência**: Feita através do ID da transferência solicitada.
 - **Pesquisa de Transação**: Feita através do ID da transferência solicitada.
 
 
 ## OBSERVAÇÃO IMPORTANTE PARA O AVALIADOR:
-* Criei um módulo chamado "Bacen" para simular alguamas (não todas) respostas efetuadas à API do Bacen. Reconheco que no mundo real haveriam muito mais complexidades neste tipo de Aplicação, no entanto, creio que o que fiz é capaz de atestar minha experiência prévia em Backend de aplicações financeiras.
+* Criei um módulo chamado "Bacen" para simular alguamas (não todas) respostas efetuadas à API do Bacen. Reconheco que no mundo real haveriam muito mais complexidades neste tipo de Aplicação, no entanto, creio que o que fiz já é capaz de atestar minha experiência prévia em Backend de aplicações financeiras relacionadas ao Bacen.
 
 ## Instalação
 Para rodar o projeto localmente, siga os passos abaixo:
 
 1. Clone o repositório:
-   ```bash
-   git clone https://github.com/othonaf/Desafio-Shopper-Othon.git
-   ```
+```bash
+git clone https://github.com/othonaf/Desafio-Shopper-Othon.git
+```
 
 2. Instale as dependências:
 
@@ -75,7 +75,7 @@ Endpoint: GET /users/cpf
 
 3. Endpoint de Criar Wallets: </br>
 
-Endpoint: POST /wallets/create
+Endpoint: POST /wallets/create </br>
 Exemplo de requisição (JSON):
 ```json
 {
