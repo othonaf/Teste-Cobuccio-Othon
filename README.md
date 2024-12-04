@@ -26,7 +26,7 @@ A API permite realizar as seguintes operações:
 
 
 ## OBSERVAÇÃO IMPORTANTE PARA O AVALIADOR:
-* Criei um módulo chamado "Bacen" para simular alguamas (não todas) respostas efetuadas à API do Bacen. Reconheco que no mundo real haveriam muito mais complexidades neste tipo de Aplicação, no entanto, creio que o que fiz já é capaz de atestar minha experiência prévia em Backend de aplicações financeiras relacionadas ao Bacen.
+* Criei um módulo chamado "Bacen" para simular algumas (não todas) respostas efetuadas à API do Bacen. Reconheco que no mundo real haveriam muito mais complexidades neste tipo de Aplicação, no entanto, creio que o que fiz já é capaz de atestar minha experiência prévia em Backend de aplicações financeiras relacionadas ao Bacen.
 
 ## Instalação
 Para rodar o projeto localmente, siga os passos abaixo:
