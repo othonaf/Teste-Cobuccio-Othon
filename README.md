@@ -2,7 +2,7 @@
 Repositório de uma API de aplicações financeiras em Nest.js como parte do teste de admissão da Cobuccio.
 
 ## Descrição
-Uma aplicação completa (Backend, Frontend e Banco de Dados) de solicitação de viagens usando a API Routes do Google Maps desenvolvida em Node.js, usando Mest.js e TypeORM no Backend e Mysql, como parte do teste de admissão da Cobuccio.
+Uma aplicação com Backend e Banco de Dados de transaçõs bancárias desenvolvida em Node.js, usando Mest.js e TypeORM no Backend e Mysql, como parte do teste de admissão da Cobuccio.
 
 ## Tecnologias Utilizadas
 - **Node.js**: Stack principal da aplicação.
