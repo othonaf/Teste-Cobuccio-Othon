@@ -7,10 +7,10 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { WalletEntity } from 'src/db/entities/wallet.entity';
+import { WalletEntity } from '../db/entities/wallet.entity';
 import { WalletService } from '../wallet/wallet.service';
 import { TransactionEntity } from '../db/entities/transaction.entity';
-import { MockBacenService } from 'src/bacen/bacen.service';
+import { MockBacenService } from '../bacen/bacen.service';
 import { v4 as uuidv4 } from 'uuid';
 
 interface TransferMetadata {
@@ -41,7 +41,7 @@ export class TransferService {
     destinationWalletId: string,
     value: number,
     transferType: 'PIX' | 'TED' | 'DOC' = 'PIX',
-  ): Promise<void> {
+  ): Promise<TransactionEntity> {
     const transactionId = uuidv4();
 
     try {
@@ -82,7 +82,7 @@ export class TransferService {
       };
 
       // Executa a transferência em uma única transação
-      await this.walletRepository.manager.transaction(
+      return await this.walletRepository.manager.transaction(
         async transactionManager => {
           // Notifica BACEN do início da transação
           await this.mockBacenService.notifyTransaction(transactionId);
@@ -130,6 +130,7 @@ export class TransferService {
             this.logger.log(
               `Transferência ${transferType} concluída - ID: ${transactionId}`,
             );
+            return transaction;
           } catch (error) {
             // Reverte status da transação em caso de erro
             transaction.status = 'failed';
@@ -170,19 +171,23 @@ export class TransferService {
     reverseReason: string,
   ): Promise<TransactionEntity> {
     const transactionId = uuidv4();
-    //Procura a transaction na Base de Dados:
+    // Procura a transaction na Base de Dados
     const transactionFind = await this.transactionRepository.findOne({
       where: { transaction_id },
     });
+
     if (!transactionFind) {
       throw new NotFoundException('ID de transação não encontrado.');
     }
+
     if (value > transactionFind.amount) {
       throw new BadRequestException(
         'O valor do estorno informado é maior do que o valor original da transação.',
       );
     }
-    let createdTransaction: TransactionEntity;
+
+    let createdTransaction: TransactionEntity = null;
+
     // Executa a transferência em uma única transação
     await this.walletRepository.manager.transaction(
       async transactionManager => {
@@ -210,6 +215,7 @@ export class TransferService {
             destinationBank: 'BANCO_COBUCCIO_001',
           },
         };
+
         createdTransaction = await transactionManager.save(transaction);
         await this.registerTransaction(metadata);
 
@@ -234,37 +240,38 @@ export class TransferService {
           // Credita na carteira de destino
           destinationWallet.balance += value;
           destinationWallet.last_updated = new Date();
-          await transactionManager.save(destinationWallet);
+          const creditedTransfer =
+            await transactionManager.save(destinationWallet);
 
           // Atualiza status da transação
-          createdTransaction.status = 'completed';
-          await transactionManager.save(transaction);
+          if (creditedTransfer) {
+            createdTransaction.status = 'completed';
+            await transactionManager.save(createdTransaction);
+          }
 
           // Confirma a transação
           await this.confirmTransaction(metadata);
           await this.mockBacenService.confirmSettlement(transactionId);
 
-          await transactionManager.update(
-            TransactionEntity,
-            { transaction_id: transaction_id },
-            {
-              reversed_at: new Date(),
-              status: 'reversed',
-            },
-          );
+          await transactionManager.save(TransactionEntity, {
+            transaction_id: transaction_id,
+            reversed_at: new Date(),
+            status: 'reversed',
+          });
 
           this.logger.log(
             `Transferência ${transactionFind.type} concluída - ID: ${transactionId}`,
           );
         } catch (error) {
           // Reverte status da transação em caso de erro
-          transaction.status = 'failed';
-          transaction.reason_for_reversal = error.message;
-          await transactionManager.save(transaction);
+          createdTransaction.status = 'failed';
+          createdTransaction.reason_for_reversal = error.message;
+          await transactionManager.save(createdTransaction);
           throw error;
         }
       },
     );
+
     return createdTransaction;
   }
 
