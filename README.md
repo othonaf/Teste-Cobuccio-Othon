@@ -2,7 +2,7 @@
 Repositório de uma API de aplicações financeiras em Nest.js como parte do teste de admissão da Cobuccio.
 
 ## Descrição
-Uma aplicação com Backend e Banco de Dados de transaçõs bancárias desenvolvida em Node.js, usando Mest.js e TypeORM no Backend e Mysql, como parte do teste de admissão da Cobuccio.
+Uma aplicação com Backend e Banco de Dados de transações bancárias desenvolvida em Node.js, usando Nest.js e TypeORM no Backend e Mysql, como parte do teste de admissão da Cobuccio.
 
 ## Tecnologias Utilizadas
 - **Node.js**: Stack principal da aplicação.
@@ -27,7 +27,6 @@ A API permite realizar as seguintes operações:
 
 ## OBSERVAÇÃO IMPORTANTE PARA O AVALIADOR:
 * Criei um módulo chamado "Bacen" para simular alguamas (não todas) respostas efetuadas à API do Bacen. Reconheco que no mundo real haveriam muito mais complexidades neste tipo de Aplicação, no entanto, creio que o que fiz é capaz de atestar minha experiência prévia em Backend de aplicações financeiras.
-* Infelizmente tive essa intercorrência, mas resolvi entregar a atividade mesmo assim pois ao menos vocês verão minha lógica e forma de programar.
 
 ## Instalação
 Para rodar o projeto localmente, siga os passos abaixo:
@@ -50,7 +49,7 @@ docker-compose up --build
 ```
 4. Um banco de dados com suas relativas tabelas deverão ser criados de acordo com o arquivo '_init.sql_'.
   
-5. Certifique-se de que o servidor Docker foi iniciado, se não tiver sido, inici-o manualmente.
+5. Certifique-se de que o servidor Docker foi iniciado, se não tiver sido, inicie-o manualmente.
 
 A API Backend estará disponível em http://localhost:3000.
 
@@ -59,7 +58,7 @@ Aqui estão alguns exemplos de como interagir com os endpoints da API.
 
 1. Criar Usuário:
 
-Endpoint: POST /users
+Endpoint: POST /users </br>
 Exemplo de requisição (JSON):
 ```json
 {
