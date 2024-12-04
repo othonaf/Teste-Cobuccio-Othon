@@ -7,11 +7,11 @@ import {
   forwardRef,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserEntity } from 'src/db/entities/user.entity';
+import { UserEntity } from '../db/entities/user.entity';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './DTO/user.dto';
 import * as bcrypt from 'bcrypt';
-import { WalletService } from 'src/wallet/wallet.service';
+import { WalletService } from '../wallet/wallet.service';
 
 @Injectable()
 export class UserService {

@@ -27,7 +27,7 @@ export class TransferController {
   ) {
     try {
       this.logger.log(`Tentativa de Transação realizada: ${transferData}`);
-      await this.transferService.fundsTransfer(
+      const transaction = await this.transferService.fundsTransfer(
         transferData.sourceWalletId,
         transferData.destinationWalletId,
         transferData.value,
@@ -37,12 +37,7 @@ export class TransferController {
       return {
         status: 'success',
         message: 'Transferência realizada com sucesso',
-        data: {
-          sourceWalletId: transferData.sourceWalletId,
-          destinationWalletId: transferData.destinationWalletId,
-          value: transferData.value,
-          transferType: transferData.transferType || 'PIX',
-        },
+        data: transaction,
       };
     } catch (error) {
       throw new HttpException(
@@ -64,7 +59,16 @@ export class TransferController {
     try {
       this.logger.log(`Buscando transação com ID: ${transaction_id}`);
       return await this.transferService.findTransaction(transaction_id);
-    } catch (error) {}
+    } catch (error) {
+      // Lançar exceção com HttpException
+      throw new HttpException(
+        {
+          status: 'error',
+          message: error.message,
+        },
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   //Endpoint de Realizar uma Transação:

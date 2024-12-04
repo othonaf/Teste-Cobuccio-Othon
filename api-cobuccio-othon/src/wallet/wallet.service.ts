@@ -7,9 +7,9 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { WalletEntity } from 'src/db/entities/wallet.entity';
+import { WalletEntity } from '../db/entities/wallet.entity';
 import { UserService } from '../user/user.service';
-import { UserEntity } from 'src/db/entities/user.entity';
+import { UserEntity } from '../db/entities/user.entity';
 
 @Injectable()
 export class WalletService {
