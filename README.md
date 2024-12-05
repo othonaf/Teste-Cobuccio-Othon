@@ -1,8 +1,9 @@
 # Teste-Cobuccio-Othon
-Repositório de uma API de aplicações financeiras em Nest.js como parte do teste de admissão da Cobuccio.
 
 ## Descrição
-Uma aplicação com Backend e Banco de Dados de transações bancárias desenvolvida em Node.js, usando Nest.js e TypeORM no Backend e Mysql, como parte do teste de admissão da Cobuccio.
+
+Uma aplicação em Docker com Backend e Banco de Dados de transações bancárias desenvolvida em Node.js, usando Nest.js e TypeORM no Backend e Mysql, como parte do teste de admissão da Cobuccio.
+
 
 ## Tecnologias Utilizadas
 - **Node.js**: Stack principal da aplicação.
@@ -12,21 +13,23 @@ Uma aplicação com Backend e Banco de Dados de transações bancárias desenvol
 - **Jest**: Biblioteca para criação e execução de testes automatizados.
 
 ## Arquitetura Utilizada
-- **Arquitetura modular padrão do Nest.js**: Utilizei aqui o formato fornecido pelo próprio Nest.js como padrão, de acordo com os comandos de geração de cada módulo (Nest generate module | controller | service <nome>).
+- **Arquitetura modular padrão do Nest.js**:  </br>
+- Utilizei aqui o formato fornecido pelo próprio Nest.js como padrão, de acordo com os comandos de geração de cada módulo (Nest generate module | controller | service <nome>).
 
 ## Funcionalidades
 A API permite realizar as seguintes operações:
 - **Criar um Usuário**: Feito através da inserção de dados normalmente solcitados por Instituições Financeiras.
 - **Pesquisar um Usuário**: Através da inserção do CPF.
 - **Criação de Wallets**: Cada Wallet relacionada a um único usuário.
-- **Consulta de Wallet**: Feita através do ID de determinada wallet e pelo CPF do usuário.
+- **Consulta de Wallet**: Feita através do ID de determinada wallet ou pelo CPF do usuário.
 - **Realização de Transferência Bancária**: Feita através dos IDs das wallets de origem e destino.
 - **Reversão de Transferência**: Feita através do ID da transferência solicitada.
 - **Pesquisa de Transação**: Feita através do ID da transferência solicitada.
 
 
 ## OBSERVAÇÃO IMPORTANTE PARA O AVALIADOR:
-* Criei um módulo chamado "Bacen" para simular algumas (não todas) respostas efetuadas à API do Bacen. Reconheco que no mundo real haveriam muito mais complexidades neste tipo de Aplicação, no entanto, creio que o que fiz já é capaz de atestar minha experiência prévia em Backend de aplicações financeiras com chamadas à API do Bacen.
+
+* Criei um módulo chamado "Bacen" para simular algumas (não todas) respostas efetuadas à API do Bacen. Reconheco que no mundo real haveriam muito mais complexidades neste tipo de Aplicação, no entanto, creio que o que fiz já é capaz de atestar minha experiência prévia em Backend de aplicações financeiras relacionadas ao Bacen.
 
 
 ## Instalação
@@ -50,7 +53,7 @@ docker-compose up --build
 ```
 4. Um banco de dados com suas relativas tabelas deverão ser criados de acordo com o arquivo '_init.sql_'.
   
-5. Certifique-se de que o servidor Docker foi iniciado, se não tiver sido, inici-o manualmente.
+5. Certifique-se de que o servidor Docker foi iniciado, se não tiver sido, inicie-o manualmente.
 
 A API Backend estará disponível em http://localhost:3000.
 
@@ -59,7 +62,8 @@ Aqui estão alguns exemplos de como interagir com os endpoints da API.
 
 1. Criar Usuário:
 
-Endpoint: POST /users <br/>
+
+Endpoint: POST /users </br>
 Exemplo de requisição (JSON):
 ```json
 {
@@ -71,12 +75,16 @@ Exemplo de requisição (JSON):
     "senha": "senha123456"
 }
 ```
-2. Consultar Usuário:<br/>
+
+2. Consultar Usuário: </br>
 Endpoint: GET /users/cpf
 
-3. Endpoint de Criar Wallets:
+3. Endpoint de Criar Wallets: </br>
+
 
 Endpoint: POST /wallets/create<br/>
+
+Endpoint: POST /wallets/create </br>
 Exemplo de requisição (JSON):
 ```json
 {
@@ -85,13 +93,14 @@ Exemplo de requisição (JSON):
     "initial_balance": 1000.00
 }
 ```
-4. Endpoint de pesequisar Wallets por Usuário: <br/>
+
+4. Endpoint de pesequisar Wallets por Usuário: </br>
    Endpoint: GET /wallets/user/cpf
 
-5. Endpoint de pesequisar Wallets por ID: <br/>
+5. Endpoint de pesequisar Wallets por ID: </br>
    Endpoint: GET /wallets/wallet_ID   
 
-6. Endpoint de Realizar Transferência:
+6. Endpoint de Realizar Transferência: </br>
 
 Endpoint: POST /transfers <br/>
 Exemplo de requisição (JSON):
@@ -104,7 +113,7 @@ Exemplo de requisição (JSON):
 }
 ```
 
-7. Endpoint de Reverter Transferência:
+7. Endpoint de Reverter Transferência: </br>
 
 Endpoint: POST /transfers/reverse <br/>
 Exemplo de requisição (JSON):
@@ -116,7 +125,8 @@ Exemplo de requisição (JSON):
 }
 ```
 
-8. Endpoint de pesequisar Transferência por ID: <br/>
+
+8. Endpoint de pesequisar Transferência por ID: </br>
    Endpoint: GET /transfers/transfer_ID 
 
 ## Testes Automatizados:
@@ -129,7 +139,7 @@ Os testes estão localizados na pasta `_testes`. Certifique-se de que todas as d
 
 
 ### Executando os Testes
-Para rodar todos os testes:
+Para rodar todos os testes: </br>
 **_Obs_**: Para uma melhor desenvoltura, recomendo executar os testes nos arquivos um por vez:
 
 1. Testando as funções em 'transfer.service':
@@ -177,6 +187,7 @@ npm run test:bacen:controller
 Este arquivo contém testes para as funções das regras de negócio (services) do módulo 'transfer', que trata transferências de saldo entre wallets.
 Testes Incluídos:
 
+
    #### TransferService
       1. Deve ser definedo.
 
@@ -189,6 +200,7 @@ Testes Incluídos:
       1. Deve reverter uma transação com sucesso.
       2. Deve lançar NotFoundException quando a transação não for encontrada.
       3. Deve lançar BadRequestException quando o valor solicitado do estorno for maior que o original (5 ms)
+
 
 ### transfer.controller.spec.ts
 Este arquivo contém testes para o controlador dos endpoints do módulo 'transfer'.
@@ -243,6 +255,7 @@ Testes Incluídos:
       1.  Deve criar um novo usuário com sucesso.
       2.  Deve lançar ConflictException se o CPF for inválido.
       3.  Deve lançar ConflictException se o usuário já existir
+
 
    #### findUserByCpf()
       1.  Deve retornar um usuário com sucesso.
