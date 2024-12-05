@@ -36,6 +36,8 @@ describe('TransferController', () => {
   describe('createTransfer', () => {
     it('deve criar uma transferência com sucesso', async () => {
       const transferData = {
+        cpf: '1513556',
+        senha: 'fdsf156',
         sourceWalletId: 'wallet1',
         destinationWalletId: 'wallet2',
         value: 1000,
@@ -53,6 +55,8 @@ describe('TransferController', () => {
         data: transaction,
       });
       expect(mockTransferService.fundsTransfer).toHaveBeenCalledWith(
+        transferData.cpf,
+        transferData.senha,
         transferData.sourceWalletId,
         transferData.destinationWalletId,
         transferData.value,
@@ -62,6 +66,8 @@ describe('TransferController', () => {
 
     it('deve lançar uma exceção em caso de erro', async () => {
       const transferData = {
+        cpf: '1513556',
+        senha: 'fdsf156',
         sourceWalletId: 'wallet1',
         destinationWalletId: 'wallet2',
         value: 1000,

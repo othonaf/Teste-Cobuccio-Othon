@@ -19,6 +19,8 @@ export class TransferController {
   async createTransfer(
     @Body()
     transferData: {
+      cpf: string;
+      senha: string;
       sourceWalletId: string;
       destinationWalletId: string;
       value: number;
@@ -28,6 +30,8 @@ export class TransferController {
     try {
       this.logger.log(`Tentativa de Transação realizada: ${transferData}`);
       const transaction = await this.transferService.fundsTransfer(
+        transferData.cpf,
+        transferData.senha,
         transferData.sourceWalletId,
         transferData.destinationWalletId,
         transferData.value,

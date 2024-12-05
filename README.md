@@ -265,6 +265,11 @@ Testes Incluídos:
    #### updateUser()
       1. Deve atualizar um usuário com sucesso
 
+   #### authenticateUser ()
+      1. Deve autenticar um usuário com sucesso.
+      2. Deve retornar false se a senha estiver incorreta.
+      3. Deve lançar NotFoundException se o usuário não for encontrado.
+
 ### user.controller.spec.ts 
 Este arquivo contém testes para o controlador dos endpoints do módulo 'user'.
 Testes Incluídos:

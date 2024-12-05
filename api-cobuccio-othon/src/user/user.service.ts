@@ -107,4 +107,29 @@ export class UserService {
       throw error;
     }
   }
+
+  async authenticateUser(cpf: string, senha: string): Promise<boolean> {
+    try {
+      const user = await this.userRepository.findOne({ where: { cpf } });
+
+      if (!user) {
+        this.logger.warn(`Usuário com CPF ${cpf} não encontrado`);
+        throw new NotFoundException('Usuário não encontrado');
+      }
+
+      const isPasswordValid = await bcrypt.compare(senha, user.senha);
+      if (!isPasswordValid) {
+        this.logger.warn(`Senha inválida para o usuário com cpf ${cpf}`);
+        return false;
+      }
+
+      this.logger.log(
+        `Auteunticação bem-sucedida para o usuário com CPF ${cpf}`,
+      );
+      return true;
+    } catch (error) {
+      this.logger.error(`Erro ao autenticar o usuário: ${error.message}`);
+      throw error;
+    }
+  }
 }

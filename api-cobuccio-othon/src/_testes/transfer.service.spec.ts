@@ -2,10 +2,15 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { TransferService } from '../transfer/transfer.service';
 import { WalletService } from '../wallet/wallet.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { UserService } from '../user/user.service';
 import { WalletEntity } from '../db/entities/wallet.entity';
 import { TransactionEntity } from '../db/entities/transaction.entity';
 import { MockBacenService } from '../bacen/bacen.service';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { mockSourceWallet } from '../_mocks/mockWallet';
 import { mockDestinationWallet } from '../_mocks/mockDestinationWallet';
@@ -13,11 +18,20 @@ import { mockDestinationWallet } from '../_mocks/mockDestinationWallet';
 describe('TransferService', () => {
   let service: TransferService;
   let walletService: WalletService;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  let userService: jest.Mocked<UserService>;
   let mockBacenService: jest.Mocked<MockBacenService>;
   let mockTransactionRepository: jest.Mocked<Repository<TransactionEntity>>;
   let mockWalletRepository: jest.Mocked<Repository<WalletEntity>>;
 
   beforeEach(async () => {
+    const mockUserService = {
+      authenticateUser: jest.fn(),
+      findUserByCpf: jest.fn(),
+      updateUser: jest.fn(),
+      createUser: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         TransferService,
@@ -57,11 +71,18 @@ describe('TransferService', () => {
             confirmSettlement: jest.fn(),
           },
         },
+        {
+          provide: UserService,
+          useValue: mockUserService,
+        },
       ],
     }).compile();
 
     service = module.get<TransferService>(TransferService);
     walletService = module.get<WalletService>(WalletService);
+    userService = module.get<UserService>(
+      UserService,
+    ) as jest.Mocked<UserService>;
     mockBacenService = module.get(MockBacenService);
     mockTransactionRepository = module.get(
       getRepositoryToken(TransactionEntity),
@@ -87,10 +108,12 @@ describe('TransferService', () => {
   describe('fundsTransfer', () => {
     it('Deve fazer a transferência com sucesso', async () => {
       const sourceWallet = {
+        cpf: 15118,
+        senha: 'fgd31465',
         wallet_id: '7b4e2df0-c55c-4e92-9d70-dd880c8e2057',
         balance: 1000,
         status: 'active',
-      } as WalletEntity;
+      } as unknown as WalletEntity;
       const destinationWallet = {
         wallet_id: '03037ebb-e73d-48db-8f06-d3b398d87ec2',
         balance: 0,
@@ -110,7 +133,16 @@ describe('TransferService', () => {
         message: 'Transação autorizada pelo BACEN',
       });
 
-      await service.fundsTransfer('123', '456', 500, 'PIX');
+      userService.authenticateUser.mockResolvedValue(true);
+
+      await service.fundsTransfer(
+        '1235146',
+        '325fgs15',
+        '123',
+        '456',
+        500,
+        'PIX',
+      );
 
       expect(mockBacenService.validateTransaction).toHaveBeenCalledWith(
         expect.any(Object),
@@ -122,6 +154,10 @@ describe('TransferService', () => {
         }),
       );
       expect(mockWalletRepository.manager.transaction).toHaveBeenCalled();
+      expect(userService.authenticateUser).toHaveBeenCalledWith(
+        '1235146',
+        '325fgs15',
+      );
     });
 
     it('Deve lançar erro se o saldo for insuficiente', async () => {
@@ -161,8 +197,9 @@ describe('TransferService', () => {
         message: 'Transação autorizada pelo BACEN',
       });
 
+      userService.authenticateUser.mockResolvedValue(true);
       await expect(
-        service.fundsTransfer('123', '456', 500, 'PIX'),
+        service.fundsTransfer('1235146', '325fgs15', '123', '456', 500, 'PIX'),
       ).rejects.toThrow('Saldo insuficiente');
     });
 
@@ -175,9 +212,18 @@ describe('TransferService', () => {
         message: 'Erro BACEN',
       });
 
+      userService.authenticateUser.mockResolvedValue(true);
+
       await expect(
-        service.fundsTransfer('123', '456', 500, 'PIX'),
+        service.fundsTransfer('1235146', '325fgs15', '123', '456', 500, 'PIX'),
       ).rejects.toThrow('Erro BACEN');
+    });
+    it('Deve lançar erro se a autenticação falhar', async () => {
+      userService.authenticateUser.mockResolvedValue(false);
+
+      await expect(
+        service.fundsTransfer('123465', 'senha123', '123', '456', 500, 'PIX'),
+      ).rejects.toThrow(ForbiddenException);
     });
   });
 
