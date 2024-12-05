@@ -106,6 +106,8 @@ Endpoint: POST /transfers <br/>
 Exemplo de requisição (JSON):
 ```json
 {
+    "cpf": "12345678900",
+    "senha": "123213465",
     "sourceWalletId": "03037ebb-e73d-48db-8f06-d3b398d87ec2",
     "destinationWalletId": "7b4e2df0-c55c-4e92-9d70-dd880c8e2057",
     "value": 30,
