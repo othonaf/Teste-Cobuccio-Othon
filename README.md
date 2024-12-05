@@ -1,7 +1,9 @@
 # Teste-Cobuccio-Othon
 
 ## Descrição
+
 Uma aplicação em Docker com Backend e Banco de Dados de transações bancárias desenvolvida em Node.js, usando Nest.js e TypeORM no Backend e Mysql, como parte do teste de admissão da Cobuccio.
+
 
 ## Tecnologias Utilizadas
 - **Node.js**: Stack principal da aplicação.
@@ -26,7 +28,9 @@ A API permite realizar as seguintes operações:
 
 
 ## OBSERVAÇÃO IMPORTANTE PARA O AVALIADOR:
+
 * Criei um módulo chamado "Bacen" para simular algumas (não todas) respostas efetuadas à API do Bacen. Reconheco que no mundo real haveriam muito mais complexidades neste tipo de Aplicação, no entanto, creio que o que fiz já é capaz de atestar minha experiência prévia em Backend de aplicações financeiras relacionadas ao Bacen.
+
 
 ## Instalação
 Para rodar o projeto localmente, siga os passos abaixo:
@@ -58,6 +62,7 @@ Aqui estão alguns exemplos de como interagir com os endpoints da API.
 
 1. Criar Usuário:
 
+
 Endpoint: POST /users </br>
 Exemplo de requisição (JSON):
 ```json
@@ -70,10 +75,14 @@ Exemplo de requisição (JSON):
     "senha": "senha123456"
 }
 ```
+
 2. Consultar Usuário: </br>
 Endpoint: GET /users/cpf
 
 3. Endpoint de Criar Wallets: </br>
+
+
+Endpoint: POST /wallets/create<br/>
 
 Endpoint: POST /wallets/create </br>
 Exemplo de requisição (JSON):
@@ -84,17 +93,16 @@ Exemplo de requisição (JSON):
     "initial_balance": 1000.00
 }
 ```
+
 4. Endpoint de pesequisar Wallets por Usuário: </br>
-   
    Endpoint: GET /wallets/user/cpf
 
 5. Endpoint de pesequisar Wallets por ID: </br>
-   
    Endpoint: GET /wallets/wallet_ID   
 
 6. Endpoint de Realizar Transferência: </br>
 
-Endpoint: POST /transfers
+Endpoint: POST /transfers <br/>
 Exemplo de requisição (JSON):
 ```json
 {
@@ -107,7 +115,7 @@ Exemplo de requisição (JSON):
 
 7. Endpoint de Reverter Transferência: </br>
 
-Endpoint: POST /transfers/reverse
+Endpoint: POST /transfers/reverse <br/>
 Exemplo de requisição (JSON):
 ```json
 {
@@ -117,8 +125,8 @@ Exemplo de requisição (JSON):
 }
 ```
 
+
 8. Endpoint de pesequisar Transferência por ID: </br>
-   
    Endpoint: GET /transfers/transfer_ID 
 
 ## Testes Automatizados:
@@ -144,37 +152,136 @@ npm run test:transfer:service
 npm run test:transfer:controller
 ```
 
+3. Testando as funções em 'Wallet.controller':
+```bash
+npm run test:wallet:controller
+```
+
+4. Testando as funções em 'Wallet.service':
+```bash
+npm run test:Wallet:service
+```
+
+5. Testando as funções em 'user.service':
+```bash
+npm run test:user:service
+```
+
+6. Testando as funções em 'user.controller':
+```bash
+npm run test:user:controller
+```
+
+7. Testando as funções em 'bacen.service':
+```bash
+npm run test:bacen:service
+```
+
+8. Testando as funções em 'bacen.controller':
+```bash
+npm run test:bacen:controller
+```
 ## Arquivos de Teste:
 
 ### transfer.service.spec.ts
 Este arquivo contém testes para as funções das regras de negócio (services) do módulo 'transfer', que trata transferências de saldo entre wallets.
 Testes Incluídos:
 
-#### TransferService
-   1. Deve ser definido.
 
-#### fundsTransfer();
-   1. Deve fazer a transferência com sucesso.
-   2. Deve lançar erro se o saldo for insuficiente.
-   3. Deve lançar erro se a validação do BACEN falhar.
-    
-#### reversalTransaction();
-   1. Deve reverter uma transação com sucesso.
-   2. Deve lançar NotFoundException quando a transação não for encontrada.
-   3. Deve lançar BadRequestException quando o valor solicitado do estorno for maior que o original.
+   #### TransferService
+      1. Deve ser definedo.
+
+   #### fundsTransfer();
+      1. Deve fazer a transferência com sucesso.
+      2. Deve lançar erro se o saldo for insuficiente.
+      3. Deve lançar erro se a validação do BACEN falhar.
+      
+   #### reversalTransaction();
+      1. Deve reverter uma transação com sucesso.
+      2. Deve lançar NotFoundException quando a transação não for encontrada.
+      3. Deve lançar BadRequestException quando o valor solicitado do estorno for maior que o original (5 ms)
+
 
 ### transfer.controller.spec.ts
 Este arquivo contém testes para o controlador dos endpoints do módulo 'transfer'.
 Testes Incluídos:
 
-#### createTransfer()
-   1.  Criar uma transferência com sucesso.
-   2.  Lançar uma exceção em caso de erro
+   #### createTransfer()
+      1.  Criar uma transferência com sucesso.
+      2.  Lançar uma exceção em caso de erro
 
-#### findTransaction()
-   1.  Deve retornar uma transação.
-   2.  Deve lançar uma exceção em caso de erro.
+   #### findTransaction()
+      1.  Deve retornar uma transação.
+      2.  Deve lançar uma exceção em caso de erro.
 
-#### reverseTransfer()
-   1. Deve reverter uma transferência com sucesso.
-   2. Deve lançar uma exceção em caso de erro.
+   #### reverseTransfer()
+      1. Deve reverter uma transferência com sucesso.
+      2. Deve lançar uma exceção em caso de erro.
+
+### wallet.service.spec.ts 
+Este arquivo contém testes para as funções das regras de negócio (services) do módulo 'wallet'.
+Testes Incluídos:
+
+   #### createWallet()
+      1.  Deve criar uma nova wallet com sucesso.
+      2.  Deve lançar NotFoundException se o usuário não for encontrado.
+
+   #### findWalletsByUser()
+      1.  Deve retornar wallets do usuário com sucesso.
+      2.  Deve lançar NotFoundException se nenhuma wallet for encontrada.
+
+   #### findWalletById()
+      1. Deve retornar a wallet com sucesso.
+      2. Deve lançar NotFoundException se a wallet não for encontrada.
+
+### wallet.controller.spec.ts 
+Este arquivo contém testes para o controlador dos endpoints do módulo 'wallet'.
+Testes Incluídos:
+
+   #### createWallet()
+      1.  Deve criar uma nova wallet com sucesso.
+
+   #### getWalletsByUser()
+      1.  Deve retornar wallets do usuário com sucesso.
+
+   #### getWalletById()
+      1. Deve retornar a wallet com sucesso.
+
+### user.service.spec.ts 
+Este arquivo contém testes para as funções das regras de negócio (services) do módulo 'user'.
+Testes Incluídos:
+
+   #### createUser()
+      1.  Deve criar um novo usuário com sucesso.
+      2.  Deve lançar ConflictException se o CPF for inválido.
+      3.  Deve lançar ConflictException se o usuário já existir
+
+
+   #### findUserByCpf()
+      1.  Deve retornar um usuário com sucesso.
+      2.  Deve lançar NotFoundException se o usuário não for encontrado.
+    
+
+   #### updateUser()
+      1. Deve atualizar um usuário com sucesso
+
+### user.controller.spec.ts 
+Este arquivo contém testes para o controlador dos endpoints do módulo 'user'.
+Testes Incluídos:
+
+   #### createUser()
+      1.  Deve criar um novo usuário com sucesso.
+      2.  Deve lançar uma exceção em caso de erro.
+
+   #### findByCpf()
+      1. Deve retornar um usuário com sucesso.
+      2. Deve lançar uma exceção em caso de erro.
+
+   #### updateUser()
+      1. Deve atualizar um usuário com sucesso.
+      2. Deve lançar uma exceção em caso de erro (10 ms)
+   
+   #### deleteUser()
+      1. Deve deletar um usuário com sucesso.
+      2. Deve lançar uma exceção em caso de erro.
+
