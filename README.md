@@ -121,7 +121,7 @@ Exemplo de requisição (JSON):
 {
     "transaction_id": "3a1091d1-4a07-4924-93a0-37c379fc5e9c",
     "value": 3,
-    "reverseReason": "Matrechan."
+    "reverseReason": "Erro no valor."
 }
 ```
 
@@ -199,7 +199,7 @@ Testes Incluídos:
    #### reversalTransaction();
       1. Deve reverter uma transação com sucesso.
       2. Deve lançar NotFoundException quando a transação não for encontrada.
-      3. Deve lançar BadRequestException quando o valor solicitado do estorno for maior que o original (5 ms)
+      3. Deve lançar BadRequestException quando o valor solicitado do estorno for maior que o original.
 
 
 ### transfer.controller.spec.ts
