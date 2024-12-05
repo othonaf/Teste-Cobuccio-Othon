@@ -6,6 +6,7 @@ import { WalletService } from '../wallet/wallet.service';
 import { Repository } from 'typeorm';
 import { NotFoundException, ConflictException } from '@nestjs/common';
 import { CreateUserDto } from '../user/DTO/user.dto';
+import * as bcrypt from 'bcrypt';
 
 describe('UserService', () => {
   let service: UserService;
@@ -187,6 +188,54 @@ describe('UserService', () => {
         updateUserDto,
       );
       expect(mockUserRepository.save).toHaveBeenCalledWith(updatedUser);
+    });
+  });
+
+  describe('authenticateUser', () => {
+    it('deve autenticar um usuário com sucesso', async () => {
+      const cpf = '12345678900';
+      const senha = 'password123';
+      const hashedPassword = await bcrypt.hash(senha, 10);
+      const user = { cpf, senha: hashedPassword } as UserEntity;
+
+      mockUserRepository.findOne.mockResolvedValue(user);
+
+      const result = await service.authenticateUser(cpf, senha);
+
+      expect(result).toBe(true);
+      expect(mockUserRepository.findOne).toHaveBeenCalledWith({
+        where: { cpf },
+      });
+    });
+
+    it('deve retornar false se a senha estiver incorreta', async () => {
+      const cpf = '12345678900';
+      const senha = 'password123';
+      const hashedPassword = await bcrypt.hash('wrongpassword', 10);
+      const user = { cpf, senha: hashedPassword } as UserEntity;
+
+      mockUserRepository.findOne.mockResolvedValue(user);
+      jest
+        .spyOn(bcrypt, 'compare')
+        .mockImplementation(() => Promise.resolve(false));
+
+      const result = await service.authenticateUser(cpf, senha);
+
+      expect(result).toBe(false);
+      expect(mockUserRepository.findOne).toHaveBeenCalledWith({
+        where: { cpf },
+      });
+    });
+
+    it('deve lançar NotFoundException se o usuário não for encontrado', async () => {
+      const cpf = '12345678900';
+      const senha = 'password123';
+
+      mockUserRepository.findOne.mockResolvedValue(null);
+
+      await expect(service.authenticateUser(cpf, senha)).rejects.toThrow(
+        new NotFoundException('Usuário não encontrado'),
+      );
     });
   });
 });

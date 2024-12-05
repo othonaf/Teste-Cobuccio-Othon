@@ -11,6 +11,7 @@ import { WalletEntity } from '../db/entities/wallet.entity';
 import { WalletService } from '../wallet/wallet.service';
 import { TransactionEntity } from '../db/entities/transaction.entity';
 import { MockBacenService } from '../bacen/bacen.service';
+import { UserService } from '../user/user.service';
 import { v4 as uuidv4 } from 'uuid';
 
 interface TransferMetadata {
@@ -34,9 +35,12 @@ export class TransferService {
     private readonly transactionRepository: Repository<TransactionEntity>,
     private readonly walletService: WalletService,
     private readonly mockBacenService: MockBacenService,
+    private readonly userService: UserService,
   ) {}
 
   async fundsTransfer(
+    cpf: string,
+    senha: string,
     sourceWalletId: string,
     destinationWalletId: string,
     value: number,
@@ -44,6 +48,11 @@ export class TransferService {
   ): Promise<TransactionEntity> {
     const transactionId = uuidv4();
 
+    const isAuthenticated = await this.userService.authenticateUser(cpf, senha);
+    if (!isAuthenticated) {
+      this.logger.warn(`Autenticação falhou para o usuário ${cpf}`);
+      throw new ForbiddenException('Usuário ou senha incorretos.');
+    }
     try {
       // Validação BACEN
       const bacenValidation = await this.mockBacenService.validateTransaction({
