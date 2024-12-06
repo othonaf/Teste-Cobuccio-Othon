@@ -37,7 +37,7 @@ Para rodar o projeto localmente, siga os passos abaixo:
 
 1. Clone o repositório:
 ```bash
-git clone https://github.com/othonaf/Desafio-Shopper-Othon.git
+git clone https://github.com/othonaf/Teste-Cobuccio-Othon.git
 ```
 
 2. Instale as dependências:
