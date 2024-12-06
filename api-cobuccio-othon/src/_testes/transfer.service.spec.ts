@@ -244,13 +244,13 @@ describe('TransferService', () => {
           cpf: '123456',
           name: 'João Silva',
           email: 'joao.silva@email.com',
-          wallets: [sourceWallet], // Aqui garantimos que `wallets` está definido
+          wallets: [sourceWallet],
         })
         .mockResolvedValueOnce({
           cpf: '654321',
           name: 'Maria Souza',
           email: 'maria.souza@email.com',
-          wallets: [destinationWallet], // Aqui garantimos que `wallets` está definido
+          wallets: [destinationWallet],
         });
 
       mockBacenService.validateTransaction.mockResolvedValue({
