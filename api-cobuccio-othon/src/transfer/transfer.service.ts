@@ -66,14 +66,22 @@ export class TransferService {
         throw new ForbiddenException(bacenValidation.message);
       }
 
-      // Validação das carteiras
-      const sourceWallet =
-        await this.walletService.findWalletById(sourceWalletId);
+      const userWallet = await this.userService.findUserByCpf(cpf);
+      const sourceWallet = userWallet.wallets.find(
+        wallet => wallet.wallet_id === sourceWalletId,
+      );
+
       const destinationWallet =
         await this.walletService.findWalletById(destinationWalletId);
 
-      if (!sourceWallet || !destinationWallet) {
-        throw new NotFoundException('Carteira não encontrada');
+      if (!sourceWallet) {
+        throw new Error(
+          'A carteira de origem não pertence ao usuário autenticado.',
+        );
+      }
+
+      if (!destinationWallet) {
+        throw new NotFoundException('Carteira de destino não encontrada');
       }
 
       // Validações de negócio

@@ -25,9 +25,33 @@ describe('TransferService', () => {
   let mockWalletRepository: jest.Mocked<Repository<WalletEntity>>;
 
   beforeEach(async () => {
+    const mockWalletService = {
+      findWalletById: jest.fn().mockImplementation(walletId => {
+        if (walletId === '03037ebb-e73d-48db-8f06-d3b398d87ec2') {
+          return {
+            wallet_id: '03037ebb-e73d-48db-8f06-d3b398d87ec2',
+            balance: 0,
+            status: 'active',
+          }; // Retorno da carteira de destino
+        }
+        return undefined; // Caso não encontre a carteira
+      }),
+    };
+
     const mockUserService = {
       authenticateUser: jest.fn(),
-      findUserByCpf: jest.fn(),
+      findUserByCpf: jest.fn().mockResolvedValue({
+        cpf: '123456',
+        name: 'João Silva',
+        email: 'joao.silva@email.com',
+        wallets: [
+          {
+            wallet_id: '7b4e2df0-c55c-4e92-9d70-dd880c8e2057',
+            balance: 1000,
+            status: 'active',
+          },
+        ],
+      }),
       updateUser: jest.fn(),
       createUser: jest.fn(),
     };
@@ -59,9 +83,7 @@ describe('TransferService', () => {
         },
         {
           provide: WalletService,
-          useValue: {
-            findWalletById: jest.fn(),
-          },
+          useValue: mockWalletService,
         },
         {
           provide: MockBacenService,
@@ -108,22 +130,48 @@ describe('TransferService', () => {
   describe('fundsTransfer', () => {
     it('Deve fazer a transferência com sucesso', async () => {
       const sourceWallet = {
-        cpf: 15118,
-        senha: 'fgd31465',
+        cpf: '123456',
+        senha: '123456',
         wallet_id: '7b4e2df0-c55c-4e92-9d70-dd880c8e2057',
         balance: 1000,
         status: 'active',
+        wallets: [
+          {
+            wallet_id: '7b4e2df0-c55c-4e92-9d70-dd880c8e2057',
+            user_cpf: '123456',
+            balance: 1000,
+            status: 'active',
+          },
+        ],
       } as unknown as WalletEntity;
       const destinationWallet = {
         wallet_id: '03037ebb-e73d-48db-8f06-d3b398d87ec2',
         balance: 0,
         status: 'active',
-      } as WalletEntity;
+        wallets: [
+          {
+            wallet_id: '03037ebb-e73d-48db-8f06-d3b398d87ec2',
+            user_cpf: '654321',
+            balance: 0,
+            status: 'active',
+          },
+        ],
+      } as unknown as WalletEntity;
 
       jest
-        .spyOn(walletService, 'findWalletById')
-        .mockResolvedValueOnce(sourceWallet)
-        .mockResolvedValueOnce(destinationWallet);
+        .spyOn(userService, 'findUserByCpf')
+        .mockResolvedValueOnce({
+          cpf: '123456',
+          name: 'João Silva',
+          email: 'joao.silva@email.com',
+          wallets: [sourceWallet], // Aqui garantimos que `wallets` está definido
+        })
+        .mockResolvedValueOnce({
+          cpf: '654321',
+          name: 'Maria Souza',
+          email: 'maria.souza@email.com',
+          wallets: [destinationWallet], // Aqui garantimos que `wallets` está definido
+        });
 
       mockBacenService.validateTransaction.mockResolvedValue({
         status: 'SUCCESS',
@@ -136,10 +184,10 @@ describe('TransferService', () => {
       userService.authenticateUser.mockResolvedValue(true);
 
       await service.fundsTransfer(
-        '1235146',
-        '325fgs15',
-        '123',
-        '456',
+        '123456',
+        '123456',
+        '7b4e2df0-c55c-4e92-9d70-dd880c8e2057',
+        '03037ebb-e73d-48db-8f06-d3b398d87ec2',
         500,
         'PIX',
       );
@@ -155,39 +203,55 @@ describe('TransferService', () => {
       );
       expect(mockWalletRepository.manager.transaction).toHaveBeenCalled();
       expect(userService.authenticateUser).toHaveBeenCalledWith(
-        '1235146',
-        '325fgs15',
+        '123456',
+        '123456',
       );
     });
 
     it('Deve lançar erro se o saldo for insuficiente', async () => {
-      const sourceWallet: WalletEntity = {
-        wallet_id: 'wallet2',
-        user_cpf: '12345678901',
+      const sourceWallet = {
+        cpf: '123456',
+        senha: '123456',
+        wallet_id: '7b4e2df0-c55c-4e92-9d70-dd880c8e2057',
         balance: 0,
-        date_created: new Date(),
         status: 'active',
-        last_updated: new Date(),
-        currency: 'BRL',
-        account_type: 'savings',
-        user: null,
-      };
-      const destinationWallet: WalletEntity = {
-        wallet_id: 'wallet2',
-        user_cpf: '12345678901',
-        balance: 1000,
-        date_created: new Date(),
+        wallets: [
+          {
+            wallet_id: '7b4e2df0-c55c-4e92-9d70-dd880c8e2057',
+            user_cpf: '123456',
+            balance: 0,
+            status: 'active',
+          },
+        ],
+      } as unknown as WalletEntity;
+      const destinationWallet = {
+        wallet_id: '03037ebb-e73d-48db-8f06-d3b398d87ec2',
+        balance: 0,
         status: 'active',
-        last_updated: new Date(),
-        currency: 'BRL',
-        account_type: 'savings',
-        user: null,
-      };
+        wallets: [
+          {
+            wallet_id: '03037ebb-e73d-48db-8f06-d3b398d87ec2',
+            user_cpf: '654321',
+            balance: 0,
+            status: 'active',
+          },
+        ],
+      } as unknown as WalletEntity;
 
       jest
-        .spyOn(walletService, 'findWalletById')
-        .mockResolvedValueOnce(sourceWallet)
-        .mockResolvedValueOnce(destinationWallet);
+        .spyOn(userService, 'findUserByCpf')
+        .mockResolvedValueOnce({
+          cpf: '123456',
+          name: 'João Silva',
+          email: 'joao.silva@email.com',
+          wallets: [sourceWallet], // Aqui garantimos que `wallets` está definido
+        })
+        .mockResolvedValueOnce({
+          cpf: '654321',
+          name: 'Maria Souza',
+          email: 'maria.souza@email.com',
+          wallets: [destinationWallet], // Aqui garantimos que `wallets` está definido
+        });
 
       mockBacenService.validateTransaction.mockResolvedValue({
         status: 'SUCCESS',
@@ -199,7 +263,14 @@ describe('TransferService', () => {
 
       userService.authenticateUser.mockResolvedValue(true);
       await expect(
-        service.fundsTransfer('1235146', '325fgs15', '123', '456', 500, 'PIX'),
+        service.fundsTransfer(
+          '123456',
+          '123456',
+          '7b4e2df0-c55c-4e92-9d70-dd880c8e2057',
+          '03037ebb-e73d-48db-8f06-d3b398d87ec2',
+          500,
+          'PIX',
+        ),
       ).rejects.toThrow('Saldo insuficiente');
     });
 
